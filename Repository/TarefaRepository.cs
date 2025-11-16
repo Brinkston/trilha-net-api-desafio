@@ -48,15 +48,34 @@ public class TarefaRepository : ITarefaRepository
         return _dataset.FirstOrDefault(t => t.Id == id);
     }
 
-    public Tarefa Update(Tarefa tarefa)
+    public Tarefa Update(int id, Tarefa tarefa)
     {
-        var existing = _dataset.FirstOrDefault(t => t.Id == tarefa.Id);
+        var existing = _dataset.FirstOrDefault(t => t.Id == id);
 
         if (existing == null) return null;
 
-        _context.Entry(existing).CurrentValues.SetValues(tarefa);
+        existing.Titulo = tarefa.Titulo;
+        existing.Descricao = tarefa.Descricao;
+        existing.Data = tarefa.Data;
+        existing.Status = tarefa.Status;
+
         _context.SaveChanges();
 
-        return tarefa;
+        return existing;
+    }
+
+    public List<Tarefa> FindByTitulo(string titulo)
+    {
+        return _dataset.Where(t => t.Titulo.Contains(titulo)).ToList();
+    }
+
+    public List<Tarefa> FindByData(DateTime data)
+    {
+        return _dataset.Where(t => t.Data.Date == data.Date).ToList();
+    }
+
+    public List<Tarefa> FindByStatus(EnumStatusTarefa status)
+    {
+        return _dataset.Where(t => t.Status == status).ToList();
     }
 }

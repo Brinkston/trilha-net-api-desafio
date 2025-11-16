@@ -17,12 +17,15 @@ public class TarefaController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(Tarefa), 200)]
+    [ProducesResponseType(404)]
     public IActionResult ObterPorId(int id)
     {
-        // TODO: Buscar o Id no banco utilizando o EF
-        // TODO: Validar o tipo de retorno. Se não encontrar a tarefa, retornar NotFound,
-        // caso contrário retornar OK com a tarefa encontrada
-        return Ok();
+        var tarefa = _business.FindById(id);
+        if (tarefa == null)
+            return NotFound();
+        
+        return Ok(tarefa);
     }
 
     [HttpGet("ObterTodos")]
@@ -35,64 +38,70 @@ public class TarefaController : ControllerBase
     }
 
     [HttpGet("ObterPorTitulo")]
+    [ProducesResponseType(typeof(List<Tarefa>), 200)]
     public IActionResult ObterPorTitulo(string titulo)
     {
-        // TODO: Buscar  as tarefas no banco utilizando o EF, que contenha o titulo recebido por parâmetro
-        // Dica: Usar como exemplo o endpoint ObterPorData
-        return Ok();
+        var tarefas = _business.FindByTitulo(titulo);
+        return Ok(tarefas);
     }
 
     [HttpGet("ObterPorData")]
+    [ProducesResponseType(typeof(List<Tarefa>), 200)]
     public IActionResult ObterPorData(DateTime data)
     {
-        //var tarefa = _context.Tarefas.Where(x => x.Data.Date == data.Date);
-        return Ok();
+        var tarefas = _business.FindByData(data);
+        return Ok(tarefas);
     }
 
     [HttpGet("ObterPorStatus")]
+    [ProducesResponseType(typeof(List<Tarefa>), 200)]
     public IActionResult ObterPorStatus(EnumStatusTarefa status)
     {
-        // TODO: Buscar  as tarefas no banco utilizando o EF, que contenha o status recebido por parâmetro
-        // Dica: Usar como exemplo o endpoint ObterPorData
-        //var tarefa = _context.Tarefas.Where(x => x.Status == status);
-        return Ok();
+        var tarefas = _business.FindByStatus(status);
+        return Ok(tarefas);
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(Tarefa), 201)]
+    [ProducesResponseType(400)]
     public IActionResult Criar(Tarefa tarefa)
     {
         if (tarefa.Data == DateTime.MinValue)
             return BadRequest(new { Erro = "A data da tarefa não pode ser vazia" });
 
-        // TODO: Adicionar a tarefa recebida no EF e salvar as mudanças (save changes)
-        return CreatedAtAction(nameof(ObterPorId), new { id = tarefa.Id }, tarefa);
+        var tarefaCriada = _business.Create(tarefa);
+        return CreatedAtAction(nameof(ObterPorId), new { id = tarefaCriada.Id }, tarefaCriada);
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(Tarefa), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
     public IActionResult Atualizar(int id, Tarefa tarefa)
     {
-        //var tarefaBanco = _context.Tarefas.Find(id);
+        var tarefaBanco = _business.FindById(id);
 
-        // if (tarefaBanco == null)
-        //     return NotFound();
+        if (tarefaBanco == null)
+            return NotFound();
 
-        // if (tarefa.Data == DateTime.MinValue)
-        //     return BadRequest(new { Erro = "A data da tarefa não pode ser vazia" });
+        if (tarefa.Data == DateTime.MinValue)
+            return BadRequest(new { Erro = "A data da tarefa não pode ser vazia" });
 
-        // TODO: Atualizar as informações da variável tarefaBanco com a tarefa recebida via parâmetro
-        // TODO: Atualizar a variável tarefaBanco no EF e salvar as mudanças (save changes)
-        return Ok();
+        var tarefaAtualizada = _business.Update(id, tarefa);
+        return Ok(tarefaAtualizada);
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public IActionResult Deletar(int id)
     {
-        // var tarefaBanco = _context.Tarefas.Find(id);
+        var tarefaBanco = _business.FindById(id);
 
-        // if (tarefaBanco == null)
-        //     return NotFound();
+        if (tarefaBanco == null)
+            return NotFound();
 
-        // TODO: Remover a tarefa encontrada através do EF e salvar as mudanças (save changes)
+        _business.Delete(id);
         return NoContent();
     }
 }
